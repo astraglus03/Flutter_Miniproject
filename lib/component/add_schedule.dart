@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'dart:math' as math;
 import '../const/colors.dart';
 
 enum Transportation { car, walking }
@@ -14,10 +16,13 @@ class _AddScheduleState extends State<AddSchedule> {
   late DateTime _selectedDate; //선택 날짜
   late TimeOfDay _selectedTime; //시간 선택
   late LatLng selectLocation = LatLng(37.5233273, 126.921252); //현재 위치 초기화(위도,경도) 지도 위치 변수
+  late LatLng _currentLocation = LatLng(0, 0); //현재 위치 초기화
 
   Transportation _selectedTransportation = Transportation.car; //이동수단 변수
   TextEditingController timeController = TextEditingController(); //시간 변수
   TextEditingController locationController = TextEditingController(); //위치텍스트 변환 변수
+  TextEditingController currentLocationController = TextEditingController(); //현재 위치텍스트 변환 변수
+  TextEditingController distanceController = TextEditingController(); //거리 변수
   TextEditingController descriptionController = TextEditingController(); //내용변수
 
   @override
@@ -25,6 +30,34 @@ class _AddScheduleState extends State<AddSchedule> {
     super.initState();
     _selectedDate = DateTime.now();
     _selectedTime = TimeOfDay.now();
+    _getCurrentLocation();
+  }
+  void _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+        currentLocationController.text = '${position.latitude}, ${position.longitude}';
+      });
+    } catch (e) {
+      print("Error: $e");
+      // 위치를 가져오는데 실패한 경우에 대한 예외 처리를 여기에 추가할 수 있습니다.
+    }
+  }
+  void distance() async{
+    try {
+      calculateDistance(_currentLocation, selectLocation);
+      double distance = calculateDistance(_currentLocation, selectLocation);
+
+      setState(() {
+        distanceController.text = '${distance}';
+      });
+    } catch(e){
+      print('거리 오류');
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -78,6 +111,30 @@ class _AddScheduleState extends State<AddSchedule> {
       });
     }
   }
+
+  double _toRadians(double degree) {//거리계산 관련 함수
+    return degree * (math.pi / 180.0);
+  }
+  double calculateDistance(LatLng start, LatLng end) { //거리계산 함수
+    const double earthRadius = 6371; // 지구 반지름 (킬로미터 단위)
+    double lat1 = start.latitude;
+    double lon1 = start.longitude;
+    double lat2 = end.latitude;
+    double lon2 = end.longitude;
+
+    double dLat = _toRadians(lat2 - lat1);
+    double dLon = _toRadians(lon2 - lon1);
+
+    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_toRadians(lat1)) * math.cos(_toRadians(lat2)) *
+            math.sin(dLon / 2) * math.sin(dLon / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    double distance = earthRadius * c; // 거리 (킬로미터 단위)
+    return distance;
+  }
+
+
 
 
   @override
@@ -171,6 +228,7 @@ class _AddScheduleState extends State<AddSchedule> {
                     setState(() {
                       selectLocation = latLng; //사용자가 찍은 위치
                       locationController.text = '${latLng.latitude}, ${latLng.longitude}'; //찍은 위치 밑 텍스트필드에 저장
+                      distance(); //거리 계산 후 불러오기 떨어진 거리 필드에
                     });
                   },
                 ),
@@ -178,7 +236,17 @@ class _AddScheduleState extends State<AddSchedule> {
               SizedBox(height: 16.0),
               TextField(
                 controller: locationController,
-                decoration: InputDecoration(labelText: '장소'),
+                decoration: InputDecoration(labelText: '약속 장소'),
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: currentLocationController,
+                decoration: InputDecoration(labelText: '현재 위치'),
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: distanceController,
+                decoration: InputDecoration(labelText: '떨어진 거리'),
               ),
               SizedBox(height: 16.0),
               TextField(
@@ -189,7 +257,7 @@ class _AddScheduleState extends State<AddSchedule> {
               SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () {
-                  // 일정 추가 버튼 눌렀을때 실행할 것
+
                 },
                 child: Text('일정 추가'),
               ),
