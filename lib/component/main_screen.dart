@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:miniproject/component/detail_screen.dart';
 import 'package:miniproject/component/home_screen.dart';
 import 'package:miniproject/component/schedule_card.dart';
 import 'package:miniproject/component/video_card.dart';
@@ -85,7 +86,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         body: ListView(
           children: [
             VideoCard(video: video!),
-            ScheduleCard(content: "안녕하세요 저는 김건동입니다", reserveTime: 12),
+            GestureDetector(
+              onTap: () => _onScheduleCardClicked(context, "안녕하세요 저는 배재민입니다", 10),
+              child: ScheduleCard(content: "안녕하세요 저는 배재민입니다", reserveTime: 10),
+            ),
             ScheduleCard(content: "안녕하세요 저는 심종혜입니다", reserveTime: 14),
             ScheduleCard(content: "안녕하세요 저는 멍청이입니다", reserveTime: 18),
             ScheduleCard(content: "안녕하세요 저는 알라딘입니다", reserveTime: 20),
@@ -116,6 +120,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       ),
       AddSchedule(),
     ];
+  }
+  void _onScheduleCardClicked(BuildContext context, String content, int reserveTime) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DetailScreen(content: content, reserveTime: reserveTime)),
+    );
   }
 
 }

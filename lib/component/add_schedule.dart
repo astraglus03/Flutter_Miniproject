@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:miniproject/component/database.dart';
 import 'dart:math' as math;
+import 'dart:io';
 import '../const/colors.dart';
+
 
 enum Transportation { car, walking }
 
@@ -256,11 +259,31 @@ class _AddScheduleState extends State<AddSchedule> {
               ),
               SizedBox(height: 32.0),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  var dbHelper = DatabaseHelper();
+                  await dbHelper.insert({
+                    'date': _selectedDate.toString(),
+                    'transportation': _selectedTransportation.toString(),
+                    'time': '${_selectedTime.hour}:${_selectedTime.minute}',
+                    'location': locationController.text,
+                    'currentLocation': currentLocationController.text,
+                    'distance': distanceController.text,
+                    'description': descriptionController.text,
+                  });
+                  // 일정이 성공적으로 추가되었음을 사용자에게 알림
+                  print('일정이 성공적으로 추가되었습니다.');
 
+                  // 데이터베이스에서 모든 일정을 가져와서 출력
+                  var allSchedules = await dbHelper.queryAll();
+                  print('모든 일정:');
+                  allSchedules.forEach((schedule) {
+                    print('Date: ${schedule['date']}, Transportation: ${schedule['transportation']}, Location: ${schedule['location']}, Time: ${schedule['time']}, Distance: ${schedule['distance']}, Description: ${schedule['description']}');
+                  });
                 },
                 child: Text('일정 추가'),
-              ),
+              )
+
+
             ],
           ),
         ),
