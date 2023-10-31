@@ -23,11 +23,11 @@ class ScheduleCard extends StatelessWidget {
   String get image {
     switch (type) {
       case 'Type.school':
-        return 'asset/img/school.jpg';
+        return 'asset/img/school1.jpg';
       case 'Type.company':
-        return 'asset/img/company.jpg';
+        return 'asset/img/company1.jpg';
       case 'Type.friend':
-        return 'asset/img/friend.jpg';
+        return 'asset/img/friend1.jpg';
       default:
         return ''; // 예외 처리를 위한 기본값
     }

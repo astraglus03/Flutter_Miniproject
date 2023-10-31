@@ -52,5 +52,21 @@ class DatabaseHelper {
     return await dbClient.query('YourTableName');
   }
 
+  Future<Map<String, dynamic>?> getRowById(int id) async {
+    Database dbClient = await db;
+    List<Map<String, dynamic>> result = await dbClient.query('YourTableName',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 2);
+
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      return null;
+    }
+  }
+
+
+
 
 }

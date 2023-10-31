@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miniproject/const/colors.dart';
+import 'package:video_player/video_player.dart';
 
 class DetailScreen extends StatelessWidget {
   final String content; // 내용
@@ -46,7 +47,6 @@ class DetailScreen extends StatelessWidget {
 
               //detail_screen 위에 (상단에 1. 이미지 2. 설정 목록 배치)
               children: [ // 화면에 위는 _이미지, 아래는 _설정 목록 위젯 띄우기
-                const SizedBox(height: 10.0),
                 _DateImage(type:type),
                 const SizedBox(height: 10.0),
                 _DDayContent(
@@ -69,48 +69,218 @@ class DetailScreen extends StatelessWidget {
   }
 }
 
-
-// 위젯1. 일정에서 등록한 이미지
-class _DateImage extends StatelessWidget {
+class _DateImage extends StatefulWidget {
   final String type;
 
-  _DateImage({required this.type});
+  const _DateImage({required this.type});
+
+  @override
+  _DateImageState createState() => _DateImageState();
+}
+
+class _DateImageState extends State<_DateImage> {
+  String largeImage = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    switch (widget.type) {
+      case 'Type.school':
+        largeImage = 'asset/img/school1.jpg';
+        break;
+      case 'Type.company':
+        largeImage = 'asset/img/company1.jpg';
+        break;
+      case 'Type.friend':
+        largeImage = 'asset/img/friend1.jpg';
+        break;
+      default:
+        largeImage = 'image1'; // 기본값
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    String image;
-    switch (type) {
+    String image1;
+    String image2;
+    String image3;
+    String videoPath;
+
+    switch (widget.type) {
       case 'Type.school':
-        image = 'asset/img/school.jpg';
+        image1 = 'asset/img/school1.jpg';
+        image2 = 'asset/img/school2.jpg';
+        image3 = 'asset/img/school3.jpg';
+        videoPath = "asset/school.mp4";
         break;
       case 'Type.company':
-        image = 'asset/img/company.jpg';
+        image1 = 'asset/img/company1.jpg';
+        image2 = 'asset/img/company2.jpg';
+        image3 = 'asset/img/company3.jpg';
+        videoPath = "asset/company.mp4";
         break;
       case 'Type.friend':
-        image = 'asset/img/friend.jpg';
+        image1 = 'asset/img/friend1.jpg';
+        image2 = 'asset/img/friend2.jpg';
+        image3 = 'asset/img/friend3.jpg';
+        videoPath = "asset/friend.mp4";
         break;
       default:
-        image = '';
+        image1 = '';
+        image2 = '';
+        image3 = '';
+        videoPath = '';
         break;
     }
+
+    void selectImage(String imageName) {
+      setState(() {
+        largeImage = imageName;
+      });
+    }
+
     return Expanded(
       child: Center(
-        child: Container(
-          width: 380, // 흰색 둥근 네모 너비
-          decoration: BoxDecoration(
-            color: Colors.grey[200], // 회색 배경(임시)
-            borderRadius: BorderRadius.circular(30.0), // 모서리 둥글게
-            image: DecorationImage(
-              image: AssetImage(image), // 이미지 경로
-              fit: BoxFit.cover, // 이미지가 화면에 맞게 크기를 조정
+        child: Column(
+          children: [
+            Expanded(
+              flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(30.0),
+                    image: DecorationImage(
+                      image: AssetImage(largeImage),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
             ),
-          ),
-          padding: EdgeInsets.all(10.0), // 내부 패딩
+            SizedBox(height: 10.0),
+            Expanded(
+              flex: 1,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      onTap: () {
+                        selectImage(image1);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(30.0),
+                          image: DecorationImage(
+                            image: AssetImage(image1),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      onTap: () {
+                        selectImage(image2);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(30.0),
+                          image: DecorationImage(
+                            image: AssetImage(image2),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      onTap: () {
+                        selectImage(image3);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(30.0),
+                          image: DecorationImage(
+                            image: AssetImage(image3),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        // 비디오 로직을 추가할 수 있습니다.
+                      },
+                      child: Container(
+                        child: _VideoContainer(videoPath: videoPath),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+
+
+class _VideoContainer extends StatefulWidget {
+  final String videoPath;
+
+  const _VideoContainer({required this.videoPath});
+
+  @override
+  _VideoContainerState createState() => _VideoContainerState();
+}
+
+class _VideoContainerState extends State<_VideoContainer> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.videoPath)
+      ..initialize().then((_) {
+        setState(() {});
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
+    )
+        : CircularProgressIndicator();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+}
+
+
 // 위젯 2.
 class _DDayContent extends StatelessWidget {
   final String date;            // 날짜
@@ -134,6 +304,7 @@ class _DDayContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+
       width: 380,
       decoration: BoxDecoration(
         color: Colors.grey[200], // 회색 배경(임시)
@@ -142,7 +313,7 @@ class _DDayContent extends StatelessWidget {
       padding: EdgeInsets.all(10.0),
       child: Column(
         children: [
-          const SizedBox(height: 20.0),
+          SizedBox(height: 20.0),
           Row(
             children: [
               Expanded(
@@ -244,7 +415,7 @@ class _DDayContent extends StatelessWidget {
                 ),
               ),
               Text(
-                transportation == 'Transportation.car' ? '자동차' : '도보',
+                transportation == 'Transportation.car' ? '자가용' : '도보',
                 style: TextStyle(
                   fontSize: 25.0,
                   color: primaryColor2,

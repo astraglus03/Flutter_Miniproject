@@ -17,7 +17,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  final String video = "asset/sample1.mp4";
+  final String video = "asset/friend.mp4";
 
   TabController? controller;
   final dbHelper = DatabaseHelper();
@@ -139,6 +139,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           String transportation = schedules[index]['transportation']; // 이동수단
           String locationtext = schedules[index]['locationtext']; // 장소
           String type = schedules[index]['type']; // 종류(학교, 회사, 개인 약속)
+          String caltime = schedules[index]['caltime']; // 걸리는 시간
 
           return GestureDetector(
             onTap: () => _onScheduleCardClicked(
@@ -150,6 +151,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               transportation, // 이동수단
               locationtext, // 장소
               type, // 타입
+
             ),
             child: ScheduleCard(
               content: schedules[index]['description'], // 내용
