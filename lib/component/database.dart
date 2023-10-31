@@ -29,7 +29,10 @@ class DatabaseHelper {
         date TEXT,
         transportation TEXT,
         time TEXT,
+        caltime TEXT,
+        type TEXT,
         location TEXT,
+        locationtext TEXT,
         currentLocation TEXT,
         distance TEXT,
         description TEXT

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miniproject/component/custom_video_player.dart';
+import 'package:miniproject/const/colors.dart';
 
 class VideoCard extends StatelessWidget {
   final String video;
@@ -11,12 +12,14 @@ class VideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Container(
+      child: Center(
         child: _context(
-        onTap: () {
-          selectVideo(context);
-        },
-        video: video,
+          onTap: () {
+            selectVideo(context);
+          },
+          video: video,
+        ),
       ),
     );
   }
@@ -48,11 +51,16 @@ class _context extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(top: 16.0),
+        height: 100,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
           border: Border.all(
             width: 1.0,
             color: Colors.black,
+          ),
+          image: DecorationImage(
+            image: AssetImage('asset/img/friend.jpg'), // 배경 이미지 경로
+            fit: BoxFit.cover,
           ),
         ),
         child: Padding(
@@ -61,7 +69,11 @@ class _context extends StatelessWidget {
             child: Center(
               child: Column( // Expanded 위젯을 Column으로 변경
                 children: [
-                  if (video != null) Expanded(child: Text(video)), // 동적으로 비디오 파일 이름 표시
+                  if (video != null) Expanded(child: Text("동영상 이미지", style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.tealAccent,
+                  ),)),
                 ],
               ),
             ),

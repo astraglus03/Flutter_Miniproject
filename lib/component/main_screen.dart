@@ -1,17 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:miniproject/component/detail_screen.dart';
-import 'package:miniproject/component/home_screen.dart';
 import 'package:miniproject/component/schedule_card.dart';
+import 'package:miniproject/component/settimg_screen.dart';
 import 'package:miniproject/component/video_card.dart';
-
 import '../const/colors.dart';
 import 'add_schedule.dart';
+import '../component/database.dart';
+import 'package:miniproject/component/detail_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key})
-      : super(key: key); // 생성자 생성 전달 인자가 없어서 똑같이 key로 놔둔거임
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -19,36 +18,38 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final String video = "asset/sample1.mp4";
-  // interface라던지 with를 사용함 TickerProviderStateMixin -> 화면 부드럽게 전환시켜줌
-  TabController? controller; // tab controller 객체 생성 -> 밖에 빼도 괜찮음
-  // 인스턴스 변수 사용이유: 밑에도 쭉 사용하기위해서
+
+  TabController? controller;
+  final dbHelper = DatabaseHelper();
+  List<Map<String, dynamic>> schedules = [];
 
   @override
   void initState() {
-    super.initState(); // 최초 실행
-
+    super.initState();
     controller = TabController(length: 2, vsync: this);
-    controller!
-        .addListener(tabListener); // controller에 addlistener를 추가해서 처리하면 이벤트 동작
-    // tablistener를 제거하기위해서 dispose 함수를 무조건 추가해야함
+    controller!.addListener(tabListener);
+    _loadSchedules();
+  }
+
+  void _loadSchedules() async {
+    List<Map<String, dynamic>> loadedSchedules = await dbHelper.queryAll();
+    setState(() {
+      schedules = loadedSchedules;
+    });
   }
 
   tabListener() {
     setState(() {});
   }
 
-  @override
-  void dispose() {
-    controller!.removeListener(tabListener);
-    super.dispose();
-  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: TabBarView(
         controller: controller,
-        children: renderChildren(), // 여기에 리턴을 받을 예정
+        children: renderChildren(),
       ),
       bottomNavigationBar: renderBottomNavigation(),
     );
@@ -83,31 +84,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   List<Widget> renderChildren() {
     return [
       Scaffold(
-        body: ListView(
-          children: [
-            VideoCard(video: video!),
-            GestureDetector(
-              onTap: () => _onScheduleCardClicked(context, "안녕하세요 저는 배재민입니다", 10),
-              child: ScheduleCard(content: "안녕하세요 저는 배재민입니다", reserveTime: 10),
-            ),
-            ScheduleCard(content: "안녕하세요 저는 심종혜입니다", reserveTime: 14),
-            ScheduleCard(content: "안녕하세요 저는 멍청이입니다", reserveTime: 18),
-            ScheduleCard(content: "안녕하세요 저는 알라딘입니다", reserveTime: 20),
-            ScheduleCard(content: "안녕하세요 저는 왕한호입니다", reserveTime: 22),
-            ScheduleCard(content: "안녕하세요 저는 정승도입니다", reserveTime: 24),
-            ScheduleCard(content: "안녕하세요 저는 배재민입니다", reserveTime: 10),
-            ScheduleCard(content: "안녕하세요 저는 김건동입니다", reserveTime: 12),
-            ScheduleCard(content: "안녕하세요 저는 심종혜입니다", reserveTime: 14),
-            ScheduleCard(content: "안녕하세요 저는 멍청이입니다", reserveTime: 18),
-            ScheduleCard(content: "안녕하세요 저는 알라딘입니다", reserveTime: 20),
-            ScheduleCard(content: "안녕하세요 저는 왕한호입니다", reserveTime: 22),
-            ScheduleCard(content: "안녕하세요 저는 정승도입니다", reserveTime: 24),
-          ],
-        ),
-        // 띄워져있는 +버튼
-        floatingActionButton:FloatingActionButton(
+        body: _buildScheduleList(),
+        floatingActionButton: FloatingActionButton(
           backgroundColor: primaryColor2,
-          onPressed: (){// 버튼 눌렀을때 화면 띄우기 //네비게이터를 이용해서 새롭게 빌드
+          onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => AddSchedule()),
@@ -118,14 +98,87 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
-      AddSchedule(),
+      SettingScreen(),
     ];
   }
-  void _onScheduleCardClicked(BuildContext context, String content, int reserveTime) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => DetailScreen(content: content, reserveTime: reserveTime)),
+
+  Widget _buildScheduleList() {
+
+    if (schedules.isEmpty) {
+      return SafeArea(
+          child: Center(
+              child: Column(
+                children: [
+                  VideoCard(
+                    video: video,
+                  ),
+                  Text('스케쥴 데이터가 없습니다.'),
+                ],
+              )
+          )
+      );
+    }
+
+    return ListView.builder(
+      itemCount: schedules.length + 1, // 스케줄 개수 + 1 (비디오 카드 추가)
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0) {
+          // 첫 번째 아이템일 때는 VideoCard를 반환
+          return VideoCard(
+            video: video,
+          );
+        } else {
+          index -= 1; // 비디오 카드를 추가했으므로 인덱스를 1 감소.
+          String dateString = schedules[index]['date']; // 날짜
+          DateTime date = DateTime.parse(dateString);
+          DateTime firstDay = date; // 디데이 날짜 계산
+
+          String formattedDate = '${date.year}-${date.month}-${date.day}';
+          String reserveTime = schedules[index]['time']; // 시간
+          String distance = schedules[index]['distance']; // 거리
+          String transportation = schedules[index]['transportation']; // 이동수단
+          String locationtext = schedules[index]['locationtext']; // 장소
+          String type = schedules[index]['type']; // 종류(학교, 회사, 개인 약속)
+
+          return GestureDetector(
+            onTap: () => _onScheduleCardClicked(
+              context,
+              schedules[index]['description'], // 내용
+              formattedDate, // 날짜 (년-월-일),
+              reserveTime, // detail_screen에서 보이게 전달하기
+              distance,    // 떨어진 거리
+              transportation, // 이동수단
+              locationtext, // 장소
+              type, // 타입
+            ),
+            child: ScheduleCard(
+              content: schedules[index]['description'], // 내용
+              date: formattedDate,
+              firstDay: firstDay, // 디데이 날짜 계산에 필요
+              type: type,
+              // reserveTime: reserveTime, // 시간 안 보이게
+            ),
+          );
+        }
+      },
     );
   }
 
+
+
+  void _onScheduleCardClicked(BuildContext context, String content, String date, String reserveTime,
+      String distance, String transportation, String locationtext, String type) {
+    // 클릭하면 DetailScreen으로 넘어가기(내용도 보내기)
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DetailScreen(content: content, date: date, reserveTime: reserveTime,
+          distance: distance, transportation: transportation, locationtext: locationtext, type: type)),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller!.removeListener(tabListener);
+    super.dispose();
+  }
 }

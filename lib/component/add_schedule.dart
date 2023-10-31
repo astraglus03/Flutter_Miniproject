@@ -4,11 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:miniproject/component/database.dart';
 import 'dart:math' as math;
-import 'dart:io';
-import '../const/colors.dart';
+import 'main_screen.dart';
 
 
 enum Transportation { car, walking }
+enum Type {school, friend, company}
 
 class AddSchedule extends StatefulWidget {
   @override
@@ -22,9 +22,11 @@ class _AddScheduleState extends State<AddSchedule> {
   late LatLng _currentLocation = LatLng(0, 0); //현재 위치 초기화
 
   Transportation _selectedTransportation = Transportation.car; //이동수단 변수
+  Type _selectedType = Type.school; //일정 타입 설정 변수
   TextEditingController timeController = TextEditingController(); //시간 변수
-  TextEditingController locationController = TextEditingController(); //위치텍스트 변환 변수
-  TextEditingController currentLocationController = TextEditingController(); //현재 위치텍스트 변환 변수
+  TextEditingController locationController = TextEditingController(); //위치텍스트(좌표값) 변환 변수
+  TextEditingController currentLocationController = TextEditingController(); //현재 위치텍스트(좌표값) 변환 변수
+  TextEditingController locationTextController = TextEditingController(); //장소 텍스트 입력
   TextEditingController distanceController = TextEditingController(); //거리 변수
   TextEditingController descriptionController = TextEditingController(); //내용변수
 
@@ -53,7 +55,7 @@ class _AddScheduleState extends State<AddSchedule> {
   void distance() async{
     try {
       calculateDistance(_currentLocation, selectLocation);
-      double distance = calculateDistance(_currentLocation, selectLocation);
+      int distance = calculateDistance(_currentLocation, selectLocation);
 
       setState(() {
         distanceController.text = '${distance}';
@@ -118,7 +120,7 @@ class _AddScheduleState extends State<AddSchedule> {
   double _toRadians(double degree) {//거리계산 관련 함수
     return degree * (math.pi / 180.0);
   }
-  double calculateDistance(LatLng start, LatLng end) { //거리계산 함수
+  int calculateDistance(LatLng start, LatLng end) { //거리계산 함수
     const double earthRadius = 6371; // 지구 반지름 (킬로미터 단위)
     double lat1 = start.latitude;
     double lon1 = start.longitude;
@@ -134,9 +136,54 @@ class _AddScheduleState extends State<AddSchedule> {
     double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 
     double distance = earthRadius * c; // 거리 (킬로미터 단위)
-    return distance;
+    return distance.toInt();
   }
 
+  int cal_Arrive_Time(){
+    int speed = 0;
+    double cal_time = 0;
+    int distance = int.parse(distanceController.text);
+    if(_selectedTransportation == Transportation.car){
+      speed = 60;
+
+      if(distance < 10){
+        if(distance>0 && distance<1){
+          cal_time = 3;
+        }
+        if(distance>1 && distance <3){
+          cal_time = 9;
+        }
+        if(distance>3 && distance<5){
+          cal_time = 15;
+        }
+        if(distance>5 && distance<10){
+          cal_time = 30;
+        }
+      }else {
+        cal_time = distance / speed;
+      }
+    }
+    if(_selectedTransportation == Transportation.walking){
+      speed = 4;
+      if(distance < 10){
+        if(distance>0 && distance<1){
+          cal_time = 15;
+        }
+        if(distance>1 && distance <3){
+          cal_time = 30;
+        }
+        if(distance>3 && distance<5){
+          cal_time = 45;
+        }
+        if(distance>5 && distance<10){
+          cal_time = 60;
+        }
+      }else{
+        cal_time = distance / speed;
+      }
+    }
+    return cal_time.toInt();
+  }
 
 
 
@@ -197,6 +244,7 @@ class _AddScheduleState extends State<AddSchedule> {
                   Text('도보'),
                 ],
               ),
+
               SizedBox(height: 16.0),
               GestureDetector(
                 onTap: () {
@@ -207,11 +255,53 @@ class _AddScheduleState extends State<AddSchedule> {
                     Icon(Icons.access_time),
                     SizedBox(width: 8.0),
                     Text(
-                      '시간 선택: ${_selectedTime.hour}:${_selectedTime.minute}',
+                      '시간 선택: ${_selectedTime.hour}:${_selectedTime.minute.toString().padLeft(2, '0')}',
                       style: TextStyle(fontSize: 16.0),
                     ),
                   ],
                 ),
+              ),
+              Row( //일정 유형 설정
+                children: [
+                  Radio(
+                    value: Type.school,
+                    groupValue: _selectedType,
+                    onChanged: (Type? value) {
+                      setState(() {
+                        _selectedType = value!;
+                      });
+                    },
+                  ),
+                  Text('학교 일'),
+                ],
+              ),
+              Row(
+                children: [
+                  Radio(
+                    value: Type.company,
+                    groupValue: _selectedType,
+                    onChanged: (Type? value) {
+                      setState(() {
+                        _selectedType = value!;
+                      });
+                    },
+                  ),
+                  Text('회사 일'),
+                ],
+              ),
+              Row(
+                children: [
+                  Radio(
+                    value: Type.friend,
+                    groupValue: _selectedType,
+                    onChanged: (Type? value) {
+                      setState(() {
+                        _selectedType = value!;
+                      });
+                    },
+                  ),
+                  Text('친구 약속'),
+                ],
               ),
               SizedBox(height: 16.0),
               Container(
@@ -238,18 +328,23 @@ class _AddScheduleState extends State<AddSchedule> {
               ),
               SizedBox(height: 16.0),
               TextField(
-                controller: locationController,
+                controller: locationTextController,
                 decoration: InputDecoration(labelText: '약속 장소'),
               ),
               SizedBox(height: 16.0),
               TextField(
+                controller: locationController,
+                decoration: InputDecoration(labelText: '약속 장소(좌표)'),
+              ),
+              SizedBox(height: 16.0),
+              TextField(
                 controller: currentLocationController,
-                decoration: InputDecoration(labelText: '현재 위치'),
+                decoration: InputDecoration(labelText: '현재 위치(좌표)'),
               ),
               SizedBox(height: 16.0),
               TextField(
                 controller: distanceController,
-                decoration: InputDecoration(labelText: '떨어진 거리'),
+                decoration: InputDecoration(labelText: '떨어진 거리(km)'),
               ),
               SizedBox(height: 16.0),
               TextField(
@@ -260,12 +355,17 @@ class _AddScheduleState extends State<AddSchedule> {
               SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () async {
+                  int arrived_time = cal_Arrive_Time();
+                  print(arrived_time);
                   var dbHelper = DatabaseHelper();
                   await dbHelper.insert({
                     'date': _selectedDate.toString(),
                     'transportation': _selectedTransportation.toString(),
-                    'time': '${_selectedTime.hour}:${_selectedTime.minute}',
+                    'time': '${_selectedTime.hour}:${_selectedTime.minute.toString().padLeft(2, '0')}',
+                    'caltime': arrived_time,
+                    'type': _selectedType.toString(),
                     'location': locationController.text,
+                    'locationtext': locationTextController.text,
                     'currentLocation': currentLocationController.text,
                     'distance': distanceController.text,
                     'description': descriptionController.text,
@@ -277,15 +377,22 @@ class _AddScheduleState extends State<AddSchedule> {
                   var allSchedules = await dbHelper.queryAll();
                   print('모든 일정:');
                   allSchedules.forEach((schedule) {
-                    print('Date: ${schedule['date']}, Transportation: ${schedule['transportation']}, Location: ${schedule['location']}, Time: ${schedule['time']}, Distance: ${schedule['distance']}, Description: ${schedule['description']}');
+                    print('Date: ${schedule['date']}, Transportation: ${schedule['transportation']},LocationText: ${schedule['locationtext']}, Location: ${schedule['location']}, Time: ${schedule['time']}, CalTime: ${schedule['caltime']} Type: ${schedule['type']}, Distance: ${schedule['distance']}, Description: ${schedule['description']}');
                   });
+                  // 일정 추가 버튼 누르면 내용 저장 후, MainScreen으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MainScreen()), // Replace `main_screen()` with the actual name of your screen class.
+                  );
+
+
                 },
                 child: Text('일정 추가'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.tealAccent,
                   minimumSize: Size(double.infinity, 40), // 버튼 최소 크기 설정 (가로 길이를 double.infinity로 설정하여 가로로 확장)
                 ),
-              ),
+              )
             ],
           ),
         ),
