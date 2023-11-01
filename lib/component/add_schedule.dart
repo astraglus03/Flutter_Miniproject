@@ -192,7 +192,7 @@ class _AddScheduleState extends State<AddSchedule> {
     return Scaffold(
       appBar: AppBar(
         title: Text('일정 추가'),
-        backgroundColor: Colors.tealAccent,
+        backgroundColor: Colors.indigo[500],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -389,7 +389,7 @@ class _AddScheduleState extends State<AddSchedule> {
                 },
                 child: Text('일정 추가'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.tealAccent,
+                  backgroundColor: Colors.indigo[500],
                   minimumSize: Size(double.infinity, 40), // 버튼 최소 크기 설정 (가로 길이를 double.infinity로 설정하여 가로로 확장)
                 ),
               )

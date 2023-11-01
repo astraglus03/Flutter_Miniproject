@@ -30,12 +30,12 @@ class DetailScreen extends StatelessWidget {
       appBar: AppBar(
         // 추가 부분
         title: Text('일정 확인'),
-        backgroundColor: Colors.tealAccent,
+        backgroundColor: Colors.indigo[500],
       ),
       body: SafeArea(
           top: true,
           child: Container(
-            color: primaryColor2,
+            color:  Color(0xFFF5F5DC),
             child: Column(
               // 위, 아래 끝에 위젯 각각을 배치
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -103,6 +103,7 @@ class _DateImageState extends State<_DateImage> {
     String image1;
     String image2;
     String image3;
+    String image4;
     String videoPath;
 
     switch (widget.type) {
@@ -110,24 +111,28 @@ class _DateImageState extends State<_DateImage> {
         image1 = 'asset/img/school1.jpg';
         image2 = 'asset/img/school2.jpg';
         image3 = 'asset/img/school3.jpg';
+        image4 = 'asset/img/school.jpg';
         videoPath = "asset/school.mp4";
         break;
       case 'Type.company':
         image1 = 'asset/img/company1.jpg';
         image2 = 'asset/img/company2.jpg';
         image3 = 'asset/img/company3.jpg';
+        image4 = 'asset/img/company.jpg';
         videoPath = "asset/company.mp4";
         break;
       case 'Type.friend':
         image1 = 'asset/img/friend1.jpg';
         image2 = 'asset/img/friend2.jpg';
         image3 = 'asset/img/friend3.jpg';
+        image4 = 'asset/img/friend.jpg';
         videoPath = "asset/friend.mp4";
         break;
       default:
         image1 = '';
         image2 = '';
         image3 = '';
+        image4 = '';
         videoPath = '';
         break;
     }
@@ -170,7 +175,7 @@ class _DateImageState extends State<_DateImage> {
                           ),
                         ),
                       )
-                    : _VideoContainer(videoPath: selectedVideoPath),
+                    : Expanded(child: _VideoContainer(videoPath: selectedVideoPath),)
               ),
             ),
             SizedBox(height: 10.0),
@@ -246,7 +251,7 @@ class _DateImageState extends State<_DateImage> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(30.0),
                           image: DecorationImage(
-                            image: AssetImage(image3),
+                            image: AssetImage(image4),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -282,14 +287,15 @@ class _VideoContainerState extends State<_VideoContainer> {
       videoPlayerController: VideoPlayerController.asset(widget.videoPath),
       autoPlay: true,
       looping: true,
-      // 다른 설정 옵션들도 추가할 수 있습니다.
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Chewie(
-      controller: _chewieController,
+    return Expanded(
+      child: Chewie(
+        controller: _chewieController,
+      ),
     );
   }
 
@@ -348,7 +354,7 @@ class _DDayContent extends StatelessWidget {
                 date,
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: primaryColor2,
+                  color: Colors.indigo[500],
                 ),
               ),
             ],
@@ -370,7 +376,7 @@ class _DDayContent extends StatelessWidget {
                 time,
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: primaryColor2,
+                  color: Colors.indigo[500],
                 ),
               ),
             ],
@@ -392,7 +398,7 @@ class _DDayContent extends StatelessWidget {
                 locationtext,
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: primaryColor2,
+                  color: Colors.indigo[500],
                 ),
               ),
             ],
@@ -414,7 +420,7 @@ class _DDayContent extends StatelessWidget {
                 double.parse(distance).round().toString(), // 떨어진 거리 반올림
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: primaryColor2,
+                  color: Colors.indigo[500],
                 ),
               ),
             ],
@@ -436,7 +442,7 @@ class _DDayContent extends StatelessWidget {
                 transportation == 'Transportation.car' ? '자가용' : '도보',
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: primaryColor2,
+                  color: Colors.indigo[500],
                 ),
               ),
             ],
@@ -458,7 +464,7 @@ class _DDayContent extends StatelessWidget {
                 contents,
                 style: TextStyle(
                   fontSize: 25.0,
-                  color: primaryColor2,
+                  color: Colors.indigo[500],
                 ),
               ),
             ],
@@ -486,14 +492,16 @@ class _DDay extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200], // 회색 배경(임시)
+        color: Color(0xFFF5F5DC), // 회색 배경(임시)
         borderRadius: BorderRadius.circular(30.0),
       ),
       padding: EdgeInsets.all(10.0),
       child: Text(
         // 만난 후 D-Day 계산하기
-            () {
-          final difference = DateTime(now.year, now.month, now.day).difference(firstDay).inDays;
+        () {
+          final difference = DateTime(now.year, now.month, now.day)
+              .difference(firstDay)
+              .inDays;
           if (difference == 0) {
             return 'D-Day';
           } else if (difference > 0) {
@@ -504,7 +512,8 @@ class _DDay extends StatelessWidget {
         }(),
         style: TextStyle(
           fontSize: 32,
-          color: primaryColor2,
+          fontWeight: FontWeight.w700,
+          color: Colors.indigo[500],
         ),
       ),
     );

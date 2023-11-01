@@ -58,7 +58,7 @@ class _context extends StatelessWidget {
             color: Colors.black,
           ),
           image: DecorationImage(
-            image: AssetImage('asset/img/friend.jpg'), // 배경 이미지 경로
+            image: AssetImage('asset/img/friend1.jpg'), // 배경 이미지 경로
             fit: BoxFit.cover,
           ),
         ),
@@ -71,7 +71,7 @@ class _context extends StatelessWidget {
                   if (video != null) Expanded(child: Text("시연 동영상 ", style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
-                    color: Colors.tealAccent,
+                    color: Colors.indigo[500],
                   ),)),
                 ],
               ),

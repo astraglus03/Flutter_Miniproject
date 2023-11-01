@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:miniproject/component/schedule_card.dart';
-import 'package:miniproject/component/settimg_screen.dart';
+import 'package:miniproject/component/setting_screen.dart';
 import 'package:miniproject/component/video_card.dart';
 import '../const/colors.dart';
 import 'add_schedule.dart';
@@ -17,7 +17,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  final String video = "asset/friend.mp4";
+  final String video = "asset/actionvideo.mp4";
 
   TabController? controller;
   final dbHelper = DatabaseHelper();
@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   BottomNavigationBar renderBottomNavigation() {
     return BottomNavigationBar(
-      backgroundColor: Colors.tealAccent,
+      backgroundColor: Colors.indigo,
       currentIndex: controller!.index,
       onTap: (int index) {
         setState(() {
@@ -86,7 +86,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       Scaffold(
         body: _buildScheduleList(),
         floatingActionButton: FloatingActionButton(
-          backgroundColor: primaryColor2,
+          backgroundColor: Colors.indigo[500],
           onPressed: () {
             Navigator.push(
               context,

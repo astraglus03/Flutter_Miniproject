@@ -23,9 +23,9 @@ class ScheduleCard extends StatelessWidget {
   String get image {
     switch (type) {
       case 'Type.school':
-        return 'asset/img/school1.jpg';
+        return 'asset/img/school2.jpg';
       case 'Type.company':
-        return 'asset/img/company1.jpg';
+        return 'asset/img/company2.jpg';
       case 'Type.friend':
         return 'asset/img/friend1.jpg';
       default:
@@ -122,7 +122,8 @@ class _DDay extends StatelessWidget {
         }(),
         style: TextStyle(
           fontSize: 32,
-          color: primaryColor2,
+          fontWeight: FontWeight.w700,
+          color:Colors.indigo,
         ),
       ),
     );
@@ -140,7 +141,7 @@ class _Date extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = TextStyle(
       fontWeight: FontWeight.w600,
-      color: primaryColor2,
+      color: Colors.indigo[500],
       fontSize: 32.0,
     );
 
@@ -165,6 +166,8 @@ class _Content extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(child: Text(content,style: TextStyle(
       fontSize: 24,
+      fontWeight: FontWeight.w700,
+      color: Colors.indigo[500],
     ),),);
   }
 }

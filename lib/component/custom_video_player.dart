@@ -33,7 +33,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("고양이 동영상"),
+        title: Text("미니프로젝트 시연 동영상"),
       ),
       body: Center(
         child: Chewie(
