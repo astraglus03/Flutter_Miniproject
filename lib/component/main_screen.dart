@@ -151,7 +151,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               transportation, // 이동수단
               locationtext, // 장소
               type, // 타입
-
+              firstDay,
             ),
             child: ScheduleCard(
               content: schedules[index]['description'], // 내용
@@ -169,12 +169,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
 
   void _onScheduleCardClicked(BuildContext context, String content, String date, String reserveTime,
-      String distance, String transportation, String locationtext, String type) {
+      String distance, String transportation, String locationtext, String type, DateTime firstDay) {
     // 클릭하면 DetailScreen으로 넘어가기(내용도 보내기)
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => DetailScreen(content: content, date: date, reserveTime: reserveTime,
-          distance: distance, transportation: transportation, locationtext: locationtext, type: type)),
+          distance: distance, transportation: transportation, locationtext: locationtext, type: type, firstDay: firstDay,)),
     );
   }
 

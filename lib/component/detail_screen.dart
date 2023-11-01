@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:miniproject/const/colors.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
 class DetailScreen extends StatelessWidget {
   final String content; // 내용
-  final String date;    // 날짜
+  final String date; // 날짜
   final String reserveTime; // 예약시간
   final String locationtext; // 장소 이름
   final String distance; // 떨어진 거리
   final String transportation; // 이동 수단
   final String type; // 학교/회사/개인약속
-
+  final DateTime firstDay;
 
   DetailScreen({
     required this.content,
@@ -20,25 +21,21 @@ class DetailScreen extends StatelessWidget {
     required this.distance,
     required this.transportation,
     required this.type,
-
+    required this.firstDay,
   });
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar( // 추가 부분
+      appBar: AppBar(
+        // 추가 부분
         title: Text('일정 확인'),
         backgroundColor: Colors.tealAccent,
       ),
-
       body: SafeArea(
           top: true,
-          child:
-          Container(
+          child: Container(
             color: primaryColor2,
-
             child: Column(
               // 위, 아래 끝에 위젯 각각을 배치
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,8 +43,10 @@ class DetailScreen extends StatelessWidget {
               //crossAxisAlignment: CrossAxisAlignment.stretch,
 
               //detail_screen 위에 (상단에 1. 이미지 2. 설정 목록 배치)
-              children: [ // 화면에 위는 _이미지, 아래는 _설정 목록 위젯 띄우기
-                _DateImage(type:type),
+              children: [
+                // 화면에 위는 _이미지, 아래는 _설정 목록 위젯 띄우기
+                _DDay(firstDay: firstDay),
+                _DateImage(type: type),
                 const SizedBox(height: 10.0),
                 _DDayContent(
                   date: '$date',
@@ -56,16 +55,12 @@ class DetailScreen extends StatelessWidget {
                   distance: '$distance',
                   transportation: '$transportation',
                   contents: '$content', // 띄어쓰기포함 최대 15자
-                  //alarm: '10분 전',
                 ),
                 const SizedBox(height: 10.0),
               ],
-
             ),
-          )
-      ),
+          )),
     );
-
   }
 }
 
@@ -80,6 +75,8 @@ class _DateImage extends StatefulWidget {
 
 class _DateImageState extends State<_DateImage> {
   String largeImage = '';
+  String selectedVideoPath = '';
+  bool _isVideoVisible = false;
 
   @override
   void initState() {
@@ -138,6 +135,17 @@ class _DateImageState extends State<_DateImage> {
     void selectImage(String imageName) {
       setState(() {
         largeImage = imageName;
+        selectedVideoPath = '';
+      });
+    }
+
+    void showVideo() {
+      setState(() {
+        selectedVideoPath = widget.type == 'Type.school'
+            ? "asset/school.mp4"
+            : widget.type == 'Type.company'
+                ? "asset/company.mp4"
+                : "asset/friend.mp4";
       });
     }
 
@@ -147,16 +155,23 @@ class _DateImageState extends State<_DateImage> {
           children: [
             Expanded(
               flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(30.0),
-                    image: DecorationImage(
-                      image: AssetImage(largeImage),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+              child: GestureDetector(
+                onTap: () {
+                  showVideo();
+                },
+                child: selectedVideoPath.isEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(30.0),
+                          image: DecorationImage(
+                            image: AssetImage(largeImage),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    : _VideoContainer(videoPath: selectedVideoPath),
+              ),
             ),
             SizedBox(height: 10.0),
             Expanded(
@@ -221,12 +236,20 @@ class _DateImageState extends State<_DateImage> {
                   ),
                   SizedBox(width: 10.0),
                   Expanded(
+                    flex: 1,
                     child: GestureDetector(
                       onTap: () {
-                        // 비디오 로직을 추가할 수 있습니다.
+                        showVideo();
                       },
                       child: Container(
-                        child: _VideoContainer(videoPath: videoPath),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(30.0),
+                          image: DecorationImage(
+                            image: AssetImage(image3),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -240,8 +263,6 @@ class _DateImageState extends State<_DateImage> {
   }
 }
 
-
-
 class _VideoContainer extends StatefulWidget {
   final String videoPath;
 
@@ -252,43 +273,41 @@ class _VideoContainer extends StatefulWidget {
 }
 
 class _VideoContainerState extends State<_VideoContainer> {
-  late VideoPlayerController _controller;
+  late ChewieController _chewieController;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset(widget.videoPath)
-      ..initialize().then((_) {
-        setState(() {});
-      });
+    _chewieController = ChewieController(
+      videoPlayerController: VideoPlayerController.asset(widget.videoPath),
+      autoPlay: true,
+      looping: true,
+      // 다른 설정 옵션들도 추가할 수 있습니다.
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    )
-        : CircularProgressIndicator();
+    return Chewie(
+      controller: _chewieController,
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _chewieController.dispose();
   }
 }
 
-
 // 위젯 2.
 class _DDayContent extends StatelessWidget {
-  final String date;            // 날짜
-  final String time;            // 시간
-  final String locationtext;        // 장소
-  final String distance;        // 거리
-  final String transportation;  // 이동 수단
-  final String  contents;       // 내용
+  final String date; // 날짜
+  final String time; // 시간
+  final String locationtext; // 장소
+  final String distance; // 거리
+  final String transportation; // 이동 수단
+  final String contents; // 내용
   //final String alarm;           // 알림
 
   _DDayContent({
@@ -304,7 +323,6 @@ class _DDayContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-
       width: 380,
       decoration: BoxDecoration(
         color: Colors.grey[200], // 회색 배경(임시)
@@ -447,10 +465,48 @@ class _DDayContent extends StatelessWidget {
           ),
           const SizedBox(height: 20.0),
           const SizedBox(height: 20.0),
-
         ],
       ),
+    );
+  }
+}
 
+// 위젯 2.
+class _DDay extends StatelessWidget {
+  final DateTime firstDay;
+
+  _DDay({
+    required this.firstDay,
+    //required this.alarm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[200], // 회색 배경(임시)
+        borderRadius: BorderRadius.circular(30.0),
+      ),
+      padding: EdgeInsets.all(10.0),
+      child: Text(
+        // 만난 후 D-Day 계산하기
+            () {
+          final difference = DateTime(now.year, now.month, now.day).difference(firstDay).inDays;
+          if (difference == 0) {
+            return 'D-Day';
+          } else if (difference > 0) {
+            return 'D+${difference}';
+          } else {
+            return 'D${difference}';
+          }
+        }(),
+        style: TextStyle(
+          fontSize: 32,
+          color: primaryColor2,
+        ),
+      ),
     );
   }
 }

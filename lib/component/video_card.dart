@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:miniproject/component/custom_video_player.dart';
-import 'package:miniproject/const/colors.dart';
 
 class VideoCard extends StatelessWidget {
   final String video;
@@ -69,7 +68,7 @@ class _context extends StatelessWidget {
             child: Center(
               child: Column( // Expanded 위젯을 Column으로 변경
                 children: [
-                  if (video != null) Expanded(child: Text("동영상 이미지", style: TextStyle(
+                  if (video != null) Expanded(child: Text("시연 동영상 ", style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
                     color: Colors.tealAccent,
