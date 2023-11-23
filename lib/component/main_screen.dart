@@ -18,6 +18,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final String video = "asset/actionvideo.mp4";
+  String appBarTitle = '일정'; // 메인스크린과 세팅스크린의 앱바 문구 유동적으로 바꾸기
 
   TabController? controller;
   final dbHelper = DatabaseHelper();
@@ -38,15 +39,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     });
   }
 
-  tabListener() {
-    setState(() {});
+  tabListener() { // 슬라이드로 메인과 세팅스크린 넘어갈 때도 앱바 문구 바꾸기
+    setState(() {
+      if (controller!.index == 0) {
+        appBarTitle = '일정';
+      } else if (controller!.index == 1) {
+        appBarTitle = '알람 설정 화면';}
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        // 추가 부분
+        title: Text(appBarTitle), //Text('일정')
+        backgroundColor: Colors.indigo[500],
+      ),
       body: TabBarView(
         controller: controller,
         children: renderChildren(),
@@ -57,9 +66,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   BottomNavigationBar renderBottomNavigation() {
     return BottomNavigationBar(
+
       backgroundColor: Colors.indigo,
       currentIndex: controller!.index,
       onTap: (int index) {
+
         setState(() {
           controller!.animateTo(index);
         });
@@ -84,6 +95,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   List<Widget> renderChildren() {
     return [
       Scaffold(
+        backgroundColor: Color(0xFFF5F5DC),
         body: _buildScheduleList(),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.indigo[500],
@@ -106,29 +118,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     if (schedules.isEmpty) {
       return SafeArea(
-          child: Center(
-              child: Column(
-                children: [
-                  VideoCard(
-                    video: video,
-                  ),
-                  Text('스케쥴 데이터가 없습니다.'),
-                ],
-              )
-          )
+        child: Center(
+          child: Text('스케쥴 데이터가 없습니다.'),
+        ),
       );
     }
 
     return ListView.builder(
-      itemCount: schedules.length + 1, // 스케줄 개수 + 1 (비디오 카드 추가)
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          // 첫 번째 아이템일 때는 VideoCard를 반환
-          return VideoCard(
-            video: video,
-          );
-        } else {
-          index -= 1; // 비디오 카드를 추가했으므로 인덱스를 1 감소.
+        itemCount: schedules.length, // 스케줄 개수
+        itemBuilder: (BuildContext context, int index) {
           String dateString = schedules[index]['date']; // 날짜
           DateTime date = DateTime.parse(dateString);
           DateTime firstDay = date; // 디데이 날짜 계산
@@ -162,7 +160,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
           );
         }
-      },
+      //},
     );
   }
 
@@ -174,7 +172,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => DetailScreen(content: content, date: date, reserveTime: reserveTime,
-          distance: distance, transportation: transportation, locationtext: locationtext, type: type, firstDay: firstDay,)),
+        distance: distance, transportation: transportation, locationtext: locationtext, type: type, firstDay: firstDay,)),
     );
   }
 

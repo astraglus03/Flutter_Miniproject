@@ -150,10 +150,8 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.indigo[500],
-        title: Text('알람 설정 화면'),
-      ),
+      backgroundColor: Color(0xFFF5F5DC),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +195,8 @@ class _SettingScreenState extends State<SettingScreen> {
                   }
                 });
               },
-              child: Text(notificationsEnabled ? '알림 비활성화' : '알림 활성화'), style: ElevatedButton.styleFrom(primary: Colors.indigo[500],),
+              child: Text(notificationsEnabled ? '알림 비활성화' : '알림 활성화'),
+              style: ElevatedButton.styleFrom(primary: Colors.indigo[500],),
             ),
 
           ],

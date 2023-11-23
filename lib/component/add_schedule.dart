@@ -18,8 +18,10 @@ class AddSchedule extends StatefulWidget {
 class _AddScheduleState extends State<AddSchedule> {
   late DateTime _selectedDate; //선택 날짜
   late TimeOfDay _selectedTime; //시간 선택
-  late LatLng selectLocation = LatLng(37.5233273, 126.921252); //현재 위치 초기화(위도,경도) 지도 위치 변수
+  late LatLng selectLocation = LatLng(36.83407, 127.1793); //현재 위치 초기화(위도,경도) 지도 위치 변수
   late LatLng _currentLocation = LatLng(0, 0); //현재 위치 초기화
+  late Marker marker;
+  late Circle circle;
 
   Transportation _selectedTransportation = Transportation.car; //이동수단 변수
   Type _selectedType = Type.school; //일정 타입 설정 변수
@@ -46,6 +48,7 @@ class _AddScheduleState extends State<AddSchedule> {
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
         currentLocationController.text = '${position.latitude}, ${position.longitude}';
+
       });
     } catch (e) {
       print("Error: $e");
@@ -190,6 +193,7 @@ class _AddScheduleState extends State<AddSchedule> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5DC),
       appBar: AppBar(
         title: Text('일정 추가'),
         backgroundColor: Colors.indigo[500],
@@ -311,10 +315,26 @@ class _AddScheduleState extends State<AddSchedule> {
                     target: selectLocation,
                     zoom: 16,
                   ),
+                  // 지도 마커
+                  markers: Set.from([
+                    Marker(
+                      markerId: MarkerId('selectedLocation'),
+                      position: selectLocation,
+                    ),
+                  ]),
+                  circles: Set.from([
+                    Circle(
+                      circleId: CircleId('choolCheckCircle'),
+                      center: selectLocation,
+                      fillColor: Colors.blue.withOpacity(0.5),
+                      radius: 100,
+                      strokeColor: Colors.blue,
+                      strokeWidth: 1,
+                    )]
+                  ),
                   onCameraMove: (CameraPosition newPosition) {//지도 이동하기
                     setState(() {
                       selectLocation = LatLng(newPosition.target.latitude, newPosition.target.longitude);
-                      //locationController.text = '${newPosition.target.latitude}, ${newPosition.target.longitude}';
                     });
                   },
                   onTap: (LatLng latLng){
@@ -322,6 +342,12 @@ class _AddScheduleState extends State<AddSchedule> {
                       selectLocation = latLng; //사용자가 찍은 위치
                       locationController.text = '${latLng.latitude}, ${latLng.longitude}'; //찍은 위치 밑 텍스트필드에 저장
                       distance(); //거리 계산 후 불러오기 떨어진 거리 필드에
+                      markers: Set.from([
+                        Marker(
+                          markerId: MarkerId('selectedLocation'),
+                          position: latLng,
+                        ),
+                      ]);
                     });
                   },
                 ),
@@ -377,7 +403,9 @@ class _AddScheduleState extends State<AddSchedule> {
                   var allSchedules = await dbHelper.queryAll();
                   print('모든 일정:');
                   allSchedules.forEach((schedule) {
-                    print('Date: ${schedule['date']}, Transportation: ${schedule['transportation']},LocationText: ${schedule['locationtext']}, Location: ${schedule['location']}, Time: ${schedule['time']}, CalTime: ${schedule['caltime']} Type: ${schedule['type']}, Distance: ${schedule['distance']}, Description: ${schedule['description']}');
+                    print('Date: ${schedule['date']}, Transportation: ${schedule['transportation']},LocationText: ${schedule['locationtext']}'
+                        ', Location: ${schedule['location']}, Time: ${schedule['time']}, CalTime: ${schedule['caltime']} Type: ${schedule['type']}'
+                        ', Distance: ${schedule['distance']}, Description: ${schedule['description']}');
                   });
                   // 일정 추가 버튼 누르면 내용 저장 후, MainScreen으로 이동
                   Navigator.push(
@@ -400,5 +428,4 @@ class _AddScheduleState extends State<AddSchedule> {
     );
   }
 }
-
 
